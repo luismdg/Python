@@ -1,0 +1,208 @@
+import pandas as pd
+import seaborn as sns
+import matplotlib.pyplot as plt
+
+# Se leen los datos del archivo
+data = pd.read_csv("UAL.csv")
+
+# Se ajusta el ancho de la tabla para que se imprima bien
+pd.set_option("display.width", 1000)
+
+
+print("\n \n Datos a Estudiar: \n \n")
+# Se imprime la tabla con 300 filas (para que se salgan todas las filas del archivo)
+print(data.head(300))
+
+# MEDIA
+
+# data.iloc : Significa que toma una columna del archivo
+# [:, 1]    : Significa que quieres que use los datos de la primera columna
+#             (Se empiezan a contar desde el "0, 1, 2, 3, 4 ...")
+# .mean()   : Es la media a esa columna seleccionada
+mean_op = data.iloc[:, 1].mean()
+mean_hi = data.iloc[:, 2].mean()
+mean_low = data.iloc[:, 3].mean()
+mean_close = data.iloc[:, 4].mean()
+mean_adj = data.iloc[:, 5].mean()
+mean_vol = data.iloc[:, 6].mean()
+
+
+# %0.2f     : Para imprimir los datos con solo dos decimales
+# %mean_op  : El este termino "%0.2f" se reemplaza con el valor de mean_op
+print("\n\n --- VALORES DE LA MEDIA --- \n")
+print("Media de Open:           %0.2f" %mean_op)
+print("Media de High:           %0.2f" %mean_hi)
+print("Media de Low:            %0.2f" %mean_low)
+print("Media de Close:          %0.2f" %mean_close)
+print("Media de Adj Close:      %0.2f" %mean_adj)
+print("Media de Volume:       %0.2f" %mean_vol)
+
+
+# MAXIMOS Y MINIMOS
+
+# .mean()       : Identifica el valor maximo a esa columna seleccionada
+#  max(), data  : Se puso una "," para separar la identificacion del maximo al del minimo
+mym_op = data.iloc[:, 1].max(), data.iloc[:, 1].min()
+mym_hi = data.iloc[:, 2].max(), data.iloc[:, 2].min()
+mym_low = data.iloc[:, 3].max(), data.iloc[:, 3].min()
+mym_close = data.iloc[:, 4].max(), data.iloc[:, 4].min()
+mym_adj = data.iloc[:, 5].max(), data.iloc[:, 5].min()
+mym_vol = data.iloc[:, 6].max(), data.iloc[:, 6].min()
+
+print("\n\n --- VALORES MAXIMOS Y MINIMOS --- \n")
+print("              Valor Maximo     Valor Minimo")
+print("Open:            %0.2f            %0.2f" %mym_op)
+print("High:            %0.2f            %0.2f" %mym_hi)
+print("Low:             %0.2f            %0.2f" %mym_low)
+print("Close:           %0.2f            %0.2f" %mym_close)
+print("Adj Close:       %0.2f            %0.2f" %mym_adj)
+print("Volume:        %0.2f       %0.2f" %mym_vol)
+
+# DESVIACION ESTANDAR
+
+# .std()       : Saca el valor estandar de esa columna
+dev_op = data.iloc[:, 1].std()
+dev_hi = data.iloc[:, 2].std()
+dev_low = data.iloc[:, 3].std()
+dev_close = data.iloc[:, 4].std()
+dev_adj = data.iloc[:, 5].std()
+dev_vol = data.iloc[:, 6].std()
+
+print("\n\n ----- DESVIACION ESTANDAR ------ \n")
+print("Desviacion Estandar de Open:           %0.2f" %dev_op)
+print("Desviacion Estandar de High:           %0.2f" %dev_hi)
+print("Desviacion Estandar de Low:            %0.2f" %dev_low)
+print("Desviacion Estandar de Close:          %0.2f" %dev_close)
+print("Desviacion Estandar de Adj Close:      %0.2f" %dev_adj)
+print("Desviacion Estandar de Volume:       %0.2f \n\n\n" %dev_vol)
+
+# IDENTIFICAR DATOS NULOS
+
+# data.iloc             : Significa que toma una columna del archivo
+# [:, 0]                : Significa que quieres que use los datos de la columna 0
+# .astype(str)          : Convierte los valores de esa columna a "string" Para que el programa pueda leerlos correctamente
+# .str.contains("#")    : Identifica los valores "string" y los compara para ver si hay un "#"
+data_null = data[data.iloc[:, 0].astype(str).str.contains("#")]
+
+# len(data_null) : La cantidad de filas que tienen "#" en su columna 0
+num_datos_null = len(data_null)
+# Saca el porcentaje de filas que tienen el # en la columna 0
+porcentaje = ((num_datos_null*253)/100)
+print("\n Numero de Datos Nulos: %d" %num_datos_null)
+print(" Porcentaje de Datos Nulos: %d" %num_datos_null)
+
+# ELIMINAR DATOS NULOS
+# data.iloc             : Significa que toma una columna del archivo
+# ~data.iloc[:, 0]      : va a buscar las filas con "#" pero solo va a imprimir las que no lo tienen, busca las que no tienen "#" porque es mas facil buscarlas y no imprimirlas
+# [:, 0]                : Significa que quieres que use los datos de la columna 0
+# .astype(str)          : Convierte los valores de esa columna a "string" Para que el programa pueda leerlos correctamente
+# .str.contains("#")    : Identifica los valores "string" y los compara para ver si hay un "#"
+new_data = data[~data.iloc[:, 0].astype(str).str.contains("#")]
+
+# CONVERTIR MILLONES
+
+# Se divide entre 1 millon porque los datos son demasiado grandes para imprimir despues en las graficas
+new_data['Volume'] = data['Volume'] / 1000000
+
+print("\n\n --- Nueva Base de Datos: --- \n")
+print(new_data.head())
+
+# sns.histplot          : Al escribir esto va a ser una grafica de lo que este "()"
+# new_data.iloc[:, 2]   : Busca la columna 2
+# bins=50               : Divide la grafica de distribucion en 50 partes
+# kde=True              : Es la linea que pone que indica la tendencia
+# stat="density"        : Mide la cantidad de elementos que se repiten (la densidad)
+
+sns.histplot(new_data.iloc[:, 2], bins=50, kde=True, stat="density", label='High')
+sns.histplot(new_data.iloc[:, 3], bins=50, kde=True, stat="density", label='Low')
+sns.histplot(new_data.iloc[:, 4], bins=50, kde=True, stat="density", label='Close')
+
+
+# Título Principal
+plt.suptitle("Distribución de Valores de High, Low y Close", fontsize=16)
+
+# Subtítulo
+plt.figtext(0.5, -0.05, "Grafica 1: Distribución de Variables", fontsize=12)
+
+# Colores de Variables
+plt.legend(title='Variables', loc='upper right')
+
+# GRAFICA DE DISTRIBUCION
+
+# Filtrar los primeros 100 datos
+subset_data = new_data.head(10)
+
+# sns.scatterplot       : Hace una grafica con lo que este "()"
+# data=new_data         : Hace la grafica a partir de la tabla sin los datos nulos
+# x="Volume", y="High"  : Establece los valores en "x" y "y"
+sns.barplot(data=subset_data, x="High", y="Volume")
+# Título Principal
+plt.suptitle("Relación entre High y Volumen", fontsize=16)
+# Subtítulo
+plt.figtext(0.5, -0.05, "Grafica 2: Relación entre High y Volumen", fontsize=11)
+#Xlabel angulo de rotacion del label
+plt.xticks(rotation = 25)
+
+# Crear gráfica de dispersión
+sns.scatterplot(data=subset_data, x="High", y="Volume")
+
+# Título Principal
+plt.suptitle("Relación entre High y Volumen", fontsize=16)
+# Subtítulo
+plt.figtext(0.5, -0.05, "Grafica 3: Relación entre High y Volumen", fontsize=13)
+
+# DATOS MUESTRA
+
+# new_data[new_data['Volume']     : Escoge la columna que se llame volumen
+# > 30]                           : Con esto dices que solo va a leer los datos de la columna volumen que superen el numero 30, ya que todos estan en millones en formato "20.00 Millones"
+filt_data = new_data[new_data['Volume'] > 30]
+print("\n\n", filt_data)
+
+# .describe()                     : Esto es una funcion que calcula automaticamente e imprime en una tabla todos los datos estadisticos (maximo, minimo, desviacion estandar, volumen)
+print("\n\n", filt_data.describe())
+
+# Grafica de distribucion
+
+sns.barplot(data=subset_data, x="Low", y="Volume")
+# Título Principal
+plt.suptitle("Relación entre Low y Volumen", fontsize=16)
+# Subtítulo
+plt.figtext(0.5, -0.05, "Grafica 4: Relación entre Low y Volumen", fontsize=11)
+plt.xticks(rotation = 25)
+
+# Crear gráfica de dispersión
+sns.scatterplot(data=subset_data, x="Low", y="Volume")
+
+# Título Principal
+plt.suptitle("Relación entre Low y Volumen", fontsize=16)
+# Subtítulo
+plt.figtext(0.5, -0.05, "Grafica 5: Relación entre Low y Volumen", fontsize=12)
+
+# Subconjunto de datos con volumen alto
+filt_data = new_data[new_data['Volume'] > 30]
+print("\n\n", filt_data)
+print("\n\n", filt_data.describe())
+
+# Filtrar los primeros 100 datos
+subset_data = new_data.head(10)
+# Grafica de barras
+sns.barplot(data=subset_data, x="Close", y="Volume")
+# Título Principal
+plt.suptitle("Relación entre Close y Volumen", fontsize=16)
+# Subtítulo
+plt.figtext(0.5, -0.05, "Grafica 6: Relación entre Close y Volumen", fontsize=10)
+plt.xticks(rotation = 25)
+
+# Crear gráfica de dispersión
+sns.scatterplot(data=subset_data, x="Close", y="Volume")
+
+# Título Principal
+plt.suptitle("Relación entre Close y Volumen", fontsize=16)
+# Subtítulo
+plt.figtext(0.5, -0.05, "Grafica 7: Relación entre Close y Volumen", fontsize=12)
+
+# Subconjunto de datos con volumen alto
+filt_data = new_data[new_data['Volume'] > 30]
+print("\n\n", filt_data)
+print("\n\n", filt_data.describe())
+
